@@ -41,3 +41,11 @@ def make_execute_sql_node(conn: sqlite3.Connection):
         return {'result_df': df, 'error': error}
 
     return execute_sql_node
+
+
+def route_after_execute(state: AgentState) -> str:
+    if state.get('error') is None:
+        return 'success'
+    if state.get('attempts', 0) >= state.get('max_attempts', 3):
+        return 'give_up'
+    return 'retry'
