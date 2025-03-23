@@ -19,3 +19,17 @@ Previous query:
 Please write a corrected query that answers the original question:
 {question}
 """
+
+CHART_DECISION_PROMPT = """Given this question and the resulting data (shown as a
+small preview), decide whether a chart would help communicate the answer.
+
+Question: {question}
+
+Data preview:
+{preview}
+
+Respond with exactly one word: "bar", "line", or "none".
+- Use "bar" for comparisons across categories.
+- Use "line" for trends over time.
+- Use "none" if the result is a single value or a chart wouldn't add value.
+"""

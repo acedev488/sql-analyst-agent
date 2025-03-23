@@ -3,9 +3,9 @@ import sqlite3
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from agent.prompts import SQL_RETRY_TEMPLATE, SQL_SYSTEM_PROMPT
+from agent.prompts import CHART_DECISION_PROMPT, SQL_RETRY_TEMPLATE, SQL_SYSTEM_PROMPT
 from agent.state import AgentState
-from agent.tools import run_sql
+from agent.tools import render_chart, run_sql
 
 
 def make_generate_sql_node(llm: BaseChatModel):
@@ -49,3 +49,18 @@ def route_after_execute(state: AgentState) -> str:
     if state.get('attempts', 0) >= state.get('max_attempts', 3):
         return 'give_up'
     return 'retry'
+
+
+def make_decide_visualization_node(llm: BaseChatModel):
+    def decide_visualization_node(state: AgentState) -> AgentState:
+        df = state['result_df']
+        preview = df.head(10).to_string(index=False)
+        prompt = CHART_DECISION_PROMPT.format(question=state['question'], preview=preview)
+        chart_type = llm.invoke([HumanMessage(content=prompt)]).content.strip().lower()
+
+        wants_chart = chart_type in {'bar', 'line'}
+        chart_path = render_chart(df, chart_type, title=state['question']) if wants_chart else None
+
+        return {'needs_chart': wants_chart, 'chart_path': chart_path}
+
+    return decide_visualization_node
