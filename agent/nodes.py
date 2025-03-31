@@ -3,7 +3,12 @@ import sqlite3
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from agent.prompts import CHART_DECISION_PROMPT, SQL_RETRY_TEMPLATE, SQL_SYSTEM_PROMPT
+from agent.prompts import (
+    CHART_DECISION_PROMPT,
+    SQL_RETRY_TEMPLATE,
+    SQL_SYSTEM_PROMPT,
+    SUMMARY_PROMPT,
+)
 from agent.state import AgentState
 from agent.tools import render_chart, run_sql
 
@@ -64,3 +69,14 @@ def make_decide_visualization_node(llm: BaseChatModel):
         return {'needs_chart': wants_chart, 'chart_path': chart_path}
 
     return decide_visualization_node
+
+
+def make_summarize_node(llm: BaseChatModel):
+    def summarize_node(state):
+        df = state['result_df']
+        preview = df.head(10).to_string(index=False)
+        prompt = SUMMARY_PROMPT.format(question=state['question'], sql=state['sql'], preview=preview)
+        response = llm.invoke([HumanMessage(content=prompt)])
+        return {'final_answer': response.content.strip()}
+
+    return summarize_node

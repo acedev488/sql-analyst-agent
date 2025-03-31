@@ -33,3 +33,18 @@ Respond with exactly one word: "bar", "line", or "none".
 - Use "line" for trends over time.
 - Use "none" if the result is a single value or a chart wouldn't add value.
 """
+
+SUMMARY_PROMPT = """You are summarizing query results for a business user who
+cannot read SQL.
+
+Question: {question}
+
+SQL used:
+{sql}
+
+Result data (preview):
+{preview}
+
+Write a concise (2-4 sentence) natural-language answer to the question, citing
+concrete numbers from the data. Do not mention SQL or tables explicitly.
+"""
