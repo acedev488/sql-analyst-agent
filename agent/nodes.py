@@ -73,7 +73,14 @@ def make_decide_visualization_node(llm: BaseChatModel):
 
 def make_summarize_node(llm: BaseChatModel):
     def summarize_node(state):
-        df = state['result_df']
+        df = state.get('result_df')
+        if df is None:
+            attempts = state.get('attempts', 0)
+            return {
+                'final_answer': f"I couldn't find an answer after {attempts} attempt(s). "
+                                 f"Last error: {state.get('error')}"
+            }
+
         preview = df.head(10).to_string(index=False)
         prompt = SUMMARY_PROMPT.format(question=state['question'], sql=state['sql'], preview=preview)
         response = llm.invoke([HumanMessage(content=prompt)])
