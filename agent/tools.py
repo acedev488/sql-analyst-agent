@@ -27,6 +27,8 @@ def get_schema(conn: sqlite3.Connection) -> str:
 
 def run_sql(conn: sqlite3.Connection, sql: str) -> Tuple[Optional[pd.DataFrame], Optional[str]]:
     stripped = sql.strip().rstrip(';')
+    if not stripped.lower().startswith('select'):
+        return None, "Only SELECT statements are allowed."
 
     try:
         df = pd.read_sql_query(stripped, conn)

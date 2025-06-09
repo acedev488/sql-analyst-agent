@@ -43,3 +43,9 @@ def test_run_sql_returns_error_on_bad_syntax(conn):
     df, error = run_sql(conn, 'SELEKT * FROM sales')
     assert df is None
     assert error is not None
+
+
+def test_run_sql_rejects_non_select_statements(conn):
+    df, error = run_sql(conn, 'DELETE FROM sales')
+    assert df is None
+    assert error == 'Only SELECT statements are allowed.'
